@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backstage do Maestro | Viola Thinking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/app-shell.css">
+<link rel="stylesheet" href="assets/css/dashboard-professor.css">
+</head>
+<body class="tela-app tela-app-backstage">
+  <header class="navbar">
+    <img src="assets/img/logo.svg" alt="Viola Thinking" class="logo-nav">
+    <nav class="nav-links">
+      <a href="dashboard-professor.html" class="active">Backstage</a>
+      <a href="aulas.html">Aulas</a>
+      
+      <a href="contato.html">Leads</a>
+      <button id="btn-sair" class="botao botao-fantasma botao-sair">Sair</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="welcome-section">
+      <p class="eyebrow">Sala dos Maestros</p>
+      <h1>Bem-vindo(a) de volta, <span class="prof-nome" id="nome-professor">maestro</span>.</h1>
+      <p class="prof-especialidade" id="especialidade-professor"></p>
+    </section>
+
+    <section class="console-resumo">
+      <div class="canal vidro">
+        <span class="canal-rotulo">Alunos matriculados</span>
+        <span class="canal-valor" id="total-alunos">—</span>
+      </div>
+      <div class="canal vidro">
+        <span class="canal-rotulo">Aulas postadas</span>
+        <span class="canal-valor" id="total-aulas">—</span>
+      </div>
+      <div class="canal vidro">
+        <span class="canal-rotulo">Mensagens pendentes</span>
+        <span class="canal-valor" id="total-leads">—</span>
+      </div>
+    </section>
+
+    <section class="painel-duplo">
+      <div class="bloco-turmas">
+        <h2>Módulos</h2>
+        <div id="lista-modulos" class="lista-turmas">
+          <p class="carregando">Carregando módulos...</p>
+        </div>
+      </div>
+
+      <div class="bloco-alunos">
+        <h2>Progresso dos Alunos</h2>
+        <div id="lista-alunos" class="lista-alunos">
+          <p class="carregando">Carregando alunos...</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+  document.getElementById('btn-sair').addEventListener('click', async () => {
+    await ViolaSessao.sair();
+    window.location.href = 'login-professor.html';
+  });
+
+  const RÓTULO_INSTRUMENTO = { violao: 'Violão', guitarra: 'Guitarra' };
+
+  async function carregarBackstage() {
+    const sessao = await ViolaSessao.exigir('professor');
+    if (!sessao) return;
+    try {
+      const dados = await ViolaAPI.dashboardProfessor();
+
+      document.getElementById('nome-professor').textContent = dados.professor.nome.split(' ')[0];
+      document.getElementById('especialidade-professor').textContent = dados.professor.especialidade;
+      document.getElementById('total-alunos').textContent = dados.alunos.length;
+      document.getElementById('total-aulas').textContent = dados.modulos.reduce((soma, m) => soma + m.total_aulas, 0);
+      document.getElementById('total-leads').textContent = dados.leadsPendentes;
+
+      renderizarModulos(dados.modulos);
+      renderizarAlunos(dados.alunos);
+    } catch (erro) {
+      document.getElementById('lista-modulos').innerHTML = `<p class="carregando">${erro.message}</p>`;
+      if (erro.message.includes('Sessão') || erro.message.includes('sessão') || erro.message.includes('restrito')) {
+        await ViolaSessao.sair();
+        setTimeout(() => { window.location.href = 'login-professor.html'; }, 1200);
+      }
+    }
+  }
+
+  function renderizarModulos(modulos) {
+    const alvo = document.getElementById('lista-modulos');
+    if (!modulos.length) {
+      alvo.innerHTML = '<p class="carregando">Nenhum módulo cadastrado.</p>';
+      return;
+    }
+    alvo.innerHTML = modulos.map((m) => `
+      <div class="cartao-turma vidro">
+        <div class="cartao-turma-topo">
+          <strong>${m.titulo}</strong>
+          <span class="chip-dourado">${m.total_alunos} aluno(s)</span>
+        </div>
+        <p class="turma-detalhe">${RÓTULO_INSTRUMENTO[m.instrumento] || m.instrumento} · Nível ${m.nivel} · ${m.total_aulas} aula(s) postada(s)</p>
+      </div>
+    `).join('');
+  }
+
+  function renderizarAlunos(alunos) {
+    const alvo = document.getElementById('lista-alunos');
+    if (!alunos.length) {
+      alvo.innerHTML = '<p class="carregando">Nenhum aluno matriculado ainda.</p>';
+      return;
+    }
+    alvo.innerHTML = alunos.map((a) => `
+      <div class="linha-aluno">
+        <div class="linha-aluno-info">
+          <span class="linha-aluno-nome">${a.nome}</span>
+          <span class="linha-aluno-nivel">${RÓTULO_INSTRUMENTO[a.instrumento] || a.instrumento} · ${a.nivel}</span>
+        </div>
+        <div class="mini-barra"><div class="mini-barra-fill" style="width:${a.progresso_medio}%;"></div></div>
+        <span class="linha-aluno-pct">${a.progresso_medio}%</span>
+      </div>
+    `).join('');
+  }
+
+  carregarBackstage();
+</script>
+</body>
+</html>

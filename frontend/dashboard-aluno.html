@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel do Aluno | Viola Thinking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/app-shell.css">
+<link rel="stylesheet" href="assets/css/dashboard-aluno.css">
+</head>
+<body class="tela-app">
+  <header class="navbar">
+    <img src="assets/img/logo.svg" alt="Viola Thinking" class="logo-nav">
+    <nav class="nav-links">
+      <a href="dashboard-aluno.html" class="active">Início</a>
+      
+      <a href="contato.html">Fale Conosco</a>
+      <button id="btn-sair" class="botao botao-fantasma botao-sair">Sair</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="welcome-section">
+      <h1>Olá, <span class="student-name" id="nome-aluno">músico</span>! Continue sua jornada.</h1>
+      <p class="nivel-tag" id="nivel-aluno"></p>
+    </section>
+
+    <section class="courses-section">
+      <h2>Meus Módulos</h2>
+      <div class="courses-grid" id="grade-modulos">
+        <p class="carregando">Afinando seu painel...</p>
+      </div>
+    </section>
+  </main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+  const btnSair = document.getElementById('btn-sair');
+  btnSair.addEventListener('click', async () => { await ViolaSessao.sair(); window.location.href = 'login-aluno.html'; });
+
+  const RÓTULO_INSTRUMENTO = { violao: 'Violão', guitarra: 'Guitarra' };
+
+  async function carregarPainel() {
+    const sessao = await ViolaSessao.exigir('aluno');
+    if (!sessao) return;
+    try {
+      const dados = await ViolaAPI.dashboardAluno();
+      document.getElementById('nome-aluno').textContent = dados.aluno.nome.split(' ')[0];
+      document.getElementById('nivel-aluno').textContent =
+        `${RÓTULO_INSTRUMENTO[dados.aluno.instrumento] || dados.aluno.instrumento} · Nível ${dados.aluno.nivel}`;
+
+      montarGradeModulos(dados.modulos);
+    } catch (erro) {
+      document.getElementById('grade-modulos').innerHTML = `<p class="carregando">${erro.message}</p>`;
+      if (erro.message.includes('Sessão') || erro.message.includes('sessão')) {
+        await ViolaSessao.sair();
+        setTimeout(() => { window.location.href = 'login-aluno.html'; }, 1200);
+      }
+    }
+  }
+
+  function montarGradeModulos(modulos) {
+    const grade = document.getElementById('grade-modulos');
+    if (!modulos.length) {
+      grade.innerHTML = '<p class="carregando">Você ainda não está matriculado em nenhum módulo.</p>';
+      return;
+    }
+    grade.innerHTML = modulos.map((m) => `
+      <article class="course-card" data-modulo-card="${m.id}">
+        <div class="card-image icon-bg"><div class="modulo-icone">${m.icone || '🎸'}</div></div>
+        <div class="card-content">
+          <h3>${m.titulo}</h3>
+          <p class="modulo-descricao">${m.descricao || ''}</p>
+          <div class="card-progress-bar"><div class="progress-fill" style="width:${m.percentual_concluido}%;"></div></div>
+          <div class="linha-acoes">
+            <span class="percentual-texto">${m.percentual_concluido}% concluído</span>
+            <button class="btn-continue" data-modulo="${m.id}">[ Ver aulas ]</button>
+          </div>
+          <div class="lista-aulas oculto" data-aulas-de="${m.id}"></div>
+        </div>
+      </article>
+    `).join('');
+
+    grade.querySelectorAll('.btn-continue').forEach((btn) => {
+      btn.addEventListener('click', () => alternarListaDeAulas(btn));
+    });
+  }
+
+  async function alternarListaDeAulas(botao) {
+    const moduloId = botao.dataset.modulo;
+    const lista = document.querySelector(`[data-aulas-de="${moduloId}"]`);
+
+    const abrindo = lista.classList.contains('oculto');
+    if (!abrindo) {
+      lista.classList.add('oculto');
+      botao.textContent = '[ Ver aulas ]';
+      return;
+    }
+
+    lista.classList.remove('oculto');
+    botao.textContent = '[ Ocultar aulas ]';
+
+    if (lista.dataset.carregado === 'true') return;
+    lista.innerHTML = '<p class="carregando">Carregando aulas...</p>';
+
+    try {
+      const aulas = await ViolaAPI.aulasDoModulo(moduloId);
+      renderizarAulas(lista, moduloId, aulas);
+      lista.dataset.carregado = 'true';
+    } catch (erro) {
+      lista.innerHTML = `<p class="carregando">${erro.message}</p>`;
+    }
+  }
+
+  function renderizarAulas(lista, moduloId, aulas) {
+    if (!aulas.length) {
+      lista.innerHTML = '<p class="carregando">Nenhuma aula postada neste módulo ainda.</p>';
+      return;
+    }
+
+    lista.innerHTML = aulas.map((a) => {
+      const embedYoutube = extrairEmbedYoutube(a.video_url);
+      const blocoVideo = embedYoutube
+        ? `<div class="item-aula-video"><iframe src="${embedYoutube}" title="${escaparHtml(a.titulo)}" allowfullscreen loading="lazy"></iframe></div>`
+        : (a.video_url ? `<a class="item-aula-link" href="${a.video_url}" target="_blank" rel="noopener">▶ Assistir vídeo</a>` : '');
+
+      return `
+        <div class="item-aula">
+          <label class="item-aula-cabecalho" for="chk-${a.id}">
+            <input type="checkbox" id="chk-${a.id}" data-aula="${a.id}" ${a.concluida ? 'checked' : ''}>
+            <span class="item-aula-info">
+              <strong>${escaparHtml(a.titulo)}</strong>
+              <small>${a.descricao ? escaparHtml(a.descricao) + ' · ' : ''}${a.duracao_min} min</small>
+            </span>
+          </label>
+          ${a.conteudo ? `<p class="item-aula-conteudo">${escaparHtml(a.conteudo)}</p>` : ''}
+          ${blocoVideo}
+          ${a.material_url ? `<a class="item-aula-link" href="${a.material_url}" target="_blank" rel="noopener">📄 Material de apoio</a>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    lista.querySelectorAll('input[type="checkbox"]').forEach((chk) => {
+      chk.addEventListener('change', async () => {
+        chk.disabled = true;
+        try {
+          const novoPercentual = await ViolaAPI.alternarConclusaoAula(chk.dataset.aula, moduloId, chk.checked);
+          const card = document.querySelector(`[data-modulo-card="${moduloId}"]`);
+          card.querySelector('.progress-fill').style.width = `${novoPercentual}%`;
+          card.querySelector('.percentual-texto').textContent = `${novoPercentual}% concluído`;
+        } catch {
+          chk.checked = !chk.checked;
+        } finally {
+          chk.disabled = false;
+        }
+      });
+    });
+  }
+
+  carregarPainel();
+</script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+/* ==========================================================
+   VIOLA THINKING — Tokens de Design & Componentes Base
+   ========================================================== */
+
+:root {
+    /* Paleta oficial */
+    --roxo-profundo: #2A1138;
+    --roxo-profundo-2: #12051A;
+    --roxo-medio: #5B2C6F;
+    --roxo-medio-2: #4A154B;
+    --roxo-claro: #F4EFF7;
+    --dourado: #D4AF37;
+    --dourado-brilho: #F0C766;
+    --texto-claro: #F2F3F4;
+    --texto-mutado: rgba(242, 243, 244, 0.65);
+    --texto-escuro: #241A2E;
+
+    /* Vidro (glassmorphism) */
+    --vidro-fundo: rgba(244, 239, 247, 0.06);
+    --vidro-borda: rgba(244, 239, 247, 0.14);
+    --vidro-blur: 18px;
+
+    /* Tipografia */
+    --fonte-display: 'Fraunces', 'Playfair Display', Georgia, serif;
+    --fonte-corpo: 'Manrope', 'Segoe UI', sans-serif;
+
+    /* Espaçamento & forma */
+    --raio: 16px;
+    --raio-lg: 28px;
+    --sombra: 0 20px 60px rgba(18, 5, 26, 0.45);
+    --transicao: 220ms cubic-bezier(.4,0,.2,1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--fonte-corpo);
+    color: var(--texto-claro);
+    background: radial-gradient(circle at 15% 10%, #3a1a4d 0%, var(--roxo-profundo) 45%, var(--roxo-profundo-2) 100%);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .fonte-display { font-family: var(--fonte-display); font-weight: 600; letter-spacing: 0.2px; }
+
+a { color: inherit; text-decoration: none; }
+
+img, svg { display: block; max-width: 100%; }
+
+::selection { background: var(--dourado); color: var(--roxo-profundo-2); }
+
+:focus-visible {
+    outline: 2px solid var(--dourado);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* ----------------------------------------------------------
+   Superfície de vidro (glassmorphism) — usada em cards/forms
+   ---------------------------------------------------------- */
+.vidro {
+    background: var(--vidro-fundo);
+    border: 1px solid var(--vidro-borda);
+    backdrop-filter: blur(var(--vidro-blur));
+    -webkit-backdrop-filter: blur(var(--vidro-blur));
+    border-radius: var(--raio-lg);
+    box-shadow: var(--sombra);
+}
+
+/* ----------------------------------------------------------
+   Botões
+   ---------------------------------------------------------- */
+.botao {
+    font-family: var(--fonte-corpo);
+    font-weight: 700;
+    font-size: 0.92rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform var(--transicao), box-shadow var(--transicao), background var(--transicao), color var(--transicao);
+}
+.botao:active { transform: translateY(1px) scale(0.99); }
+
+.botao-dourado {
+    background: linear-gradient(135deg, var(--dourado-brilho), var(--dourado));
+    color: var(--roxo-profundo-2);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.28);
+}
+.botao-dourado:hover { box-shadow: 0 14px 36px rgba(212, 175, 55, 0.4); transform: translateY(-1px); }
+.botao-dourado:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+.botao-fantasma {
+    background: transparent;
+    color: var(--texto-claro);
+    border: 1px solid var(--vidro-borda);
+}
+.botao-fantasma:hover { border-color: var(--dourado); color: var(--dourado); }
+
+/* ----------------------------------------------------------
+   Formulários
+   ---------------------------------------------------------- */
+.campo { margin-bottom: 18px; text-align: left; }
+.campo label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--texto-mutado);
+    margin-bottom: 8px;
+}
+.campo input,
+.campo select,
+.campo textarea {
+    width: 100%;
+    padding: 13px 16px;
+    background: rgba(18, 5, 26, 0.35);
+    border: 1px solid var(--vidro-borda);
+    border-radius: 12px;
+    color: var(--texto-claro);
+    font-family: var(--fonte-corpo);
+    font-size: 0.98rem;
+    transition: border-color var(--transicao), background var(--transicao);
+}
+.campo input::placeholder, .campo textarea::placeholder { color: rgba(242,243,244,0.35); }
+.campo input:focus, .campo select:focus, .campo textarea:focus {
+    border-color: var(--dourado);
+    background: rgba(18, 5, 26, 0.55);
+    outline: none;
+}
+.campo textarea { resize: vertical; min-height: 110px; }
+.campo select option { background: var(--roxo-profundo-2); color: var(--texto-claro); }
+
+.mensagem-erro, .mensagem-sucesso {
+    font-size: 0.85rem;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    display: none;
+}
+.mensagem-erro { background: rgba(200, 60, 60, 0.18); border: 1px solid rgba(200,60,60,0.4); color: #ffb4b4; }
+.mensagem-sucesso { background: rgba(60, 180, 130, 0.16); border: 1px solid rgba(60,180,130,0.4); color: #a9f0d1; }
+.mensagem-erro.ativo, .mensagem-sucesso.ativo { display: block; }
+
+/* ----------------------------------------------------------
+   Utilitários de bokeh / atmosfera
+   ---------------------------------------------------------- */
+.bokeh {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,175,55,0.55), transparent 70%);
+    filter: blur(2px);
+    pointer-events: none;
+    animation: flutuar 9s ease-in-out infinite;
+}
+@keyframes flutuar {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+    50% { transform: translateY(-18px) scale(1.08); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+.oculto { display: none !important; }

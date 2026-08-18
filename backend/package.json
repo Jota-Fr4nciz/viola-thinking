@@ -1,0 +1,22 @@
+{
+  "name": "viola-thinking-backend",
+  "version": "2.1.0",
+  "description": "API de apoio (Service Role) da Viola Thinking, rodando sobre Supabase (Postgres + Auth + RLS), com upload opcional de vídeo-aulas para o YouTube",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "autorizar-youtube": "node scripts/autorizar-youtube.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "googleapis": "^140.0.1",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

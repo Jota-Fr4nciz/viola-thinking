@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Postar Conteúdo | Viola Thinking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/app-shell.css">
+<link rel="stylesheet" href="assets/css/dashboard-professor.css">
+<link rel="stylesheet" href="assets/css/postar-conteudo.css">
+</head>
+<body class="tela-app tela-app-backstage">
+  <header class="navbar">
+    <img src="assets/img/logo.svg" alt="Viola Thinking" class="logo-nav">
+    <nav class="nav-links">
+      <a href="dashboard-professor.html">Backstage</a>
+      <a href="postar-conteudo.html" class="active">Postar Conteúdo</a>
+      <a href="historia.html">Nossa Jornada</a>
+      <a href="contato.html">Leads</a>
+      <button id="btn-sair" class="botao botao-fantasma botao-sair">Sair</button>
+    </nav>
+  </header>
+
+  <main class="container container-postar">
+    <section class="welcome-section">
+      <p class="eyebrow">Sala dos Maestros</p>
+      <h1>Postar novo conteúdo</h1>
+      <p class="prof-especialidade">Escolha o nível e o(s) instrumento(s) — a mesma aula pode valer para mais de um módulo.</p>
+    </section>
+
+    <form id="form-aula" class="vidro cartao-postar">
+      <div class="mensagem-erro" id="erro-aula"></div>
+      <div class="mensagem-sucesso" id="sucesso-aula"></div>
+
+      <div class="campo">
+        <label for="a-titulo">Título da aula</label>
+        <input type="text" id="a-titulo" placeholder="Ex.: Primeiro acorde: Mi menor" required>
+      </div>
+
+      <div class="campo">
+        <label for="a-descricao">Descrição curta</label>
+        <input type="text" id="a-descricao" placeholder="Uma linha resumindo o conteúdo">
+      </div>
+
+      <div class="campo">
+        <label for="a-conteudo">Conteúdo / texto de apoio</label>
+        <textarea id="a-conteudo" placeholder="Explicação, passo a passo, dicas..."></textarea>
+      </div>
+
+      <div class="grade-dois-campos">
+        <div class="campo">
+          <label for="a-video">Link do vídeo</label>
+          <input type="url" id="a-video" placeholder="https://...">
+        </div>
+        <div class="campo">
+          <label for="a-material">Material de apoio</label>
+          <input type="url" id="a-material" placeholder="https://...">
+        </div>
+      </div>
+
+      <div class="grade-dois-campos">
+        <div class="campo">
+          <label for="a-duracao">Duração (minutos)</label>
+          <input type="number" id="a-duracao" min="1" value="15">
+        </div>
+        <div class="campo">
+          <label for="a-nivel">Nível</label>
+          <select id="a-nivel">
+            <option value="Iniciante">Iniciante</option>
+            <option value="Intermediário">Intermediário</option>
+            <option value="Avançado">Avançado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Instrumento(s)</label>
+        <div class="grupo-checkbox">
+          <label class="opcao-checkbox">
+            <input type="checkbox" id="a-instrumento-violao" value="violao" checked>
+            Violão
+          </label>
+          <label class="opcao-checkbox">
+            <input type="checkbox" id="a-instrumento-guitarra" value="guitarra">
+            Guitarra
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="botao botao-dourado botao-full" id="btn-postar">[ PUBLICAR AULA ]</button>
+    </form>
+  </main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+  document.getElementById('btn-sair').addEventListener('click', async () => {
+    await ViolaSessao.sair();
+    window.location.href = 'login-professor.html';
+  });
+
+  (async () => {
+    const sessao = await ViolaSessao.exigir('professor');
+    if (!sessao) return;
+  })();
+
+  document.getElementById('form-aula').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    ocultarMensagens('#erro-aula', '#sucesso-aula');
+    const botao = document.getElementById('btn-postar');
+
+    const instrumentos = ['violao', 'guitarra'].filter(
+      (i) => document.getElementById(`a-instrumento-${i}`).checked
+    );
+
+    const payload = {
+      titulo: document.getElementById('a-titulo').value.trim(),
+      descricao: document.getElementById('a-descricao').value.trim(),
+      conteudo: document.getElementById('a-conteudo').value.trim(),
+      video_url: document.getElementById('a-video').value.trim(),
+      material_url: document.getElementById('a-material').value.trim(),
+      duracao_min: Number(document.getElementById('a-duracao').value) || 15,
+      nivel: document.getElementById('a-nivel').value,
+      instrumentos,
+    };
+
+    if (!instrumentos.length) {
+      exibirMensagem('#erro-aula', 'Escolha ao menos um instrumento.');
+      return;
+    }
+
+    botao.disabled = true; botao.textContent = 'Publicando...';
+    try {
+      await ViolaAPI.postarAula(payload);
+      exibirMensagem('#sucesso-aula', 'Aula publicada com sucesso!', 'sucesso');
+      document.getElementById('form-aula').reset();
+      document.getElementById('a-instrumento-violao').checked = true;
+    } catch (erro) {
+      exibirMensagem('#erro-aula', erro.message);
+    } finally {
+      botao.disabled = false; botao.textContent = '[ PUBLICAR AULA ]';
+    }
+  });
+</script>
+</body>
+</html>

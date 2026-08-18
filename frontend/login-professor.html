@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backstage | Viola Thinking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/login.css">
+</head>
+<body class="tela-login tela-backstage">
+
+  <div class="silhueta-viola" aria-hidden="true"></div>
+
+  <main class="cartao-login vidro">
+    <img src="assets/img/logo.svg" alt="Viola Thinking" class="logo-login">
+    <p class="subtitulo">Backstage — Sala dos Maestros</p>
+
+    <div class="switch-papel">
+      <a href="login-aluno.html">Sou Aluno</a>
+      <a href="login-professor.html" class="ativo">Sou Professor</a>
+    </div>
+
+    <div class="abas" role="tablist">
+      <button class="aba ativa" data-aba="entrar" role="tab" aria-selected="true">Acessar</button>
+      <button class="aba" data-aba="cadastrar" role="tab" aria-selected="false">Unir-se à Regência</button>
+    </div>
+
+    <!-- ENTRAR -->
+    <form id="form-login" class="painel-aba" data-painel="entrar">
+      <div class="mensagem-erro" id="erro-login"></div>
+      <div class="campo">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" placeholder="maestro@exemplo.com" required autocomplete="email">
+      </div>
+      <div class="campo">
+        <label for="login-senha">Senha</label>
+        <input type="password" id="login-senha" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="botao botao-dourado botao-full" id="btn-login">[ ACESSAR BACKSTAGE ]</button>
+    </form>
+
+    <!-- CADASTRO -->
+    <form id="form-cadastro" class="painel-aba oculto" data-painel="cadastrar">
+      <div class="mensagem-erro" id="erro-cadastro"></div>
+      <div class="mensagem-sucesso" id="sucesso-cadastro"></div>
+      <div class="campo">
+        <label for="cad-nome">Nome completo</label>
+        <input type="text" id="cad-nome" placeholder="Seu nome" required autocomplete="name">
+      </div>
+      <div class="campo">
+        <label for="cad-email">E-mail</label>
+        <input type="email" id="cad-email" placeholder="maestro@exemplo.com" required autocomplete="email">
+      </div>
+      <div class="campo">
+        <label for="cad-senha">Senha</label>
+        <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" minlength="6" required autocomplete="new-password">
+      </div>
+      <div class="campo">
+        <label for="cad-instrumento">Instrumento principal</label>
+        <select id="cad-instrumento">
+          <option>Viola Caipira</option>
+          <option>Viola Acústica</option>
+          <option>Viola Erudita</option>
+          <option>Viola Popular</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="cad-bio">Mini-bio artística</label>
+        <textarea id="cad-bio" placeholder="Conte um pouco da sua trajetória..."></textarea>
+      </div>
+      <div class="campo">
+        <label for="cad-portfolio">Portfólio ou Currículo Lattes (link)</label>
+        <input type="url" id="cad-portfolio" placeholder="https://...">
+      </div>
+      <button type="submit" class="botao botao-dourado botao-full" id="btn-cadastro">[ UNIR-SE À REGÊNCIA ]</button>
+    </form>
+  </main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+  document.querySelectorAll('.aba').forEach((aba) => {
+    aba.addEventListener('click', () => {
+      document.querySelectorAll('.aba').forEach((a) => { a.classList.remove('ativa'); a.setAttribute('aria-selected', 'false'); });
+      aba.classList.add('ativa'); aba.setAttribute('aria-selected', 'true');
+      const alvo = aba.dataset.aba;
+      document.querySelectorAll('.painel-aba').forEach((p) => p.classList.toggle('oculto', p.dataset.painel !== alvo));
+    });
+  });
+
+  document.getElementById('form-login').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    ocultarMensagens('#erro-login');
+    const botao = document.getElementById('btn-login');
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+
+    botao.disabled = true; botao.textContent = 'Acessando...';
+    try {
+      await ViolaAPI.login(email, senha);
+      window.location.href = 'dashboard-professor.html';
+    } catch (erro) {
+      exibirMensagem('#erro-login', erro.message);
+    } finally {
+      botao.disabled = false; botao.textContent = '[ ACESSAR BACKSTAGE ]';
+    }
+  });
+
+  document.getElementById('form-cadastro').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    ocultarMensagens('#erro-cadastro', '#sucesso-cadastro');
+    const botao = document.getElementById('btn-cadastro');
+    const payload = {
+      nome: document.getElementById('cad-nome').value.trim(),
+      email: document.getElementById('cad-email').value.trim(),
+      senha: document.getElementById('cad-senha').value,
+      especialidade: document.getElementById('cad-instrumento').value,
+      bio: document.getElementById('cad-bio').value.trim(),
+      portfolio_url: document.getElementById('cad-portfolio').value.trim(),
+    };
+
+    botao.disabled = true; botao.textContent = 'Cadastrando...';
+    try {
+      const resposta = await ViolaAPI.registrarProfessor(payload);
+      if (resposta.access_token) {
+        exibirMensagem('#sucesso-cadastro', 'Cadastro de maestro concluído. Bem-vindo(a) ao Backstage.', 'sucesso');
+        setTimeout(() => { window.location.href = 'dashboard-professor.html'; }, 900);
+      } else {
+        exibirMensagem('#sucesso-cadastro', 'Quase lá! Confirme seu e-mail para ativar seu acesso ao Backstage.', 'sucesso');
+      }
+    } catch (erro) {
+      exibirMensagem('#erro-cadastro', erro.message);
+    } finally {
+      botao.disabled = false; botao.textContent = '[ UNIR-SE À REGÊNCIA ]';
+    }
+  });
+</script>
+</body>
+</html>

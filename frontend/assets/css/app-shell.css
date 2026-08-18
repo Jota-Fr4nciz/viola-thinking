@@ -1,0 +1,42 @@
+/* ==========================================================
+   Casca compartilhada das telas internas (navbar + container)
+   ========================================================== */
+
+.tela-app { min-height: 100vh; }
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 6%;
+    background: rgba(18, 5, 26, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--vidro-borda);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.logo-nav { height: 32px; width: auto; }
+
+.nav-links { display: flex; align-items: center; gap: 30px; }
+.nav-links a {
+    color: var(--texto-mutado);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: color var(--transicao), border-color var(--transicao);
+}
+.nav-links a:hover, .nav-links a.active { color: var(--dourado); border-color: var(--dourado); }
+
+.botao-sair { padding: 8px 18px; font-size: 0.78rem; }
+
+.container { max-width: 1180px; margin: 48px auto; padding: 0 24px; }
+
+.carregando { color: var(--texto-mutado); font-size: 0.9rem; }
+
+@media (max-width: 720px) {
+    .navbar { flex-direction: column; gap: 14px; padding: 16px 5%; }
+    .nav-links { gap: 18px; flex-wrap: wrap; justify-content: center; }
+}

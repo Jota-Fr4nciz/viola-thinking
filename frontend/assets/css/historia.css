@@ -1,0 +1,52 @@
+/* ==========================================================
+   Nossa Jornada — narrativa institucional em revista digital
+   ========================================================== */
+
+.container-historia {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 60px;
+    align-items: start;
+}
+
+.coluna-narrativa h1 {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.12;
+    color: var(--dourado);
+    margin: 10px 0 26px;
+}
+.coluna-narrativa p { color: var(--texto-claro); opacity: 0.92; line-height: 1.75; margin-bottom: 18px; max-width: 62ch; }
+.coluna-narrativa em { color: var(--dourado); font-style: normal; }
+
+.linha-tempo {
+    border-left: 2px solid rgba(212,175,55,0.4);
+    padding-left: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.marco { position: relative; }
+.marco::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dourado);
+    box-shadow: 0 0 0 4px rgba(212,175,55,0.18);
+}
+.marco-ano { font-family: var(--fonte-display); color: var(--dourado); font-size: 1.05rem; display: block; margin-bottom: 4px; }
+.marco p { font-size: 0.86rem; color: var(--texto-mutado); line-height: 1.6; }
+
+.secao-fundadores { max-width: 1180px; margin: 20px auto 70px; padding: 0 24px; }
+.ilustracao-varanda { padding: 30px; text-align: center; }
+.svg-varanda { width: 100%; max-width: 560px; height: auto; }
+.varanda-legenda { margin-top: 12px; font-size: 0.8rem; color: var(--texto-mutado); }
+
+@media (max-width: 860px) {
+    .container-historia { grid-template-columns: 1fr; }
+    .linha-tempo { border-left: none; padding-left: 0; border-top: 2px solid rgba(212,175,55,0.4); padding-top: 26px; }
+    .marco::before { left: -6px; top: -32px; }
+}

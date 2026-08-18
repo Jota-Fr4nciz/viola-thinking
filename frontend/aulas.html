@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aulas | Viola Thinking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/app-shell.css">
+<link rel="stylesheet" href="assets/css/dashboard-professor.css">
+<link rel="stylesheet" href="assets/css/aulas.css">
+</head>
+<body class="tela-app tela-app-backstage">
+  <header class="navbar">
+    <img src="assets/img/logo.svg" alt="Viola Thinking" class="logo-nav">
+    <nav class="nav-links">
+      <a href="dashboard-professor.html">Backstage</a>
+      <a href="aulas.html" class="active">Aulas</a>
+      <a href="historia.html">Nossa Jornada</a>
+      <a href="contato.html">Leads</a>
+      <button id="btn-sair" class="botao botao-fantasma botao-sair">Sair</button>
+    </nav>
+  </header>
+
+  <main class="container container-aulas">
+    <section class="welcome-section">
+      <p class="eyebrow">Sala dos Maestros</p>
+      <h1>Aulas</h1>
+      <p class="prof-especialidade">Escolha um módulo para ver, criar, reordenar ou editar o conteúdo postado nele.</p>
+    </section>
+
+    <div class="campo campo-seletor-modulo">
+      <label for="seletor-modulo">Módulo</label>
+      <select id="seletor-modulo"><option>Carregando módulos...</option></select>
+    </div>
+
+    <section class="bloco-lista-aulas vidro">
+      <div class="cabecalho-lista">
+        <h2 id="titulo-modulo-atual">—</h2>
+        <button class="botao botao-dourado" id="btn-nova-aula">[ + Nova aula ]</button>
+      </div>
+      <div id="lista-aulas-professor"><p class="carregando">Selecione um módulo.</p></div>
+    </section>
+
+    <!-- Formulário de criação/edição — some por padrão -->
+    <section class="cartao-form-aula vidro oculto" id="painel-form-aula">
+      <div class="cabecalho-lista">
+        <h2 id="titulo-form-aula">Nova aula</h2>
+        <button class="botao botao-fantasma" id="btn-fechar-form" type="button">Fechar</button>
+      </div>
+
+      <form id="form-aula">
+        <div class="mensagem-erro" id="erro-aula"></div>
+        <div class="mensagem-sucesso" id="sucesso-aula"></div>
+
+        <div class="campo">
+          <label for="a-titulo">Título da aula</label>
+          <input type="text" id="a-titulo" placeholder="Ex.: Primeiro acorde: Mi menor" required>
+        </div>
+
+        <div class="campo">
+          <label for="a-descricao">Descrição curta</label>
+          <input type="text" id="a-descricao" placeholder="Uma linha resumindo o conteúdo">
+        </div>
+
+        <div class="campo">
+          <label for="a-conteudo">Conteúdo / texto de apoio</label>
+          <textarea id="a-conteudo" placeholder="Explicação, passo a passo, dicas..."></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="a-video">Link do vídeo (YouTube)</label>
+          <input type="url" id="a-video" placeholder="https://youtube.com/watch?v=...">
+        </div>
+
+        <div class="campo campo-upload-youtube">
+          <label for="a-video-arquivo">Ou envie um vídeo direto para o canal do YouTube</label>
+          <input type="file" id="a-video-arquivo" accept="video/*">
+          <div class="barra-upload oculto" id="barra-upload">
+            <div class="barra-upload-fill" id="barra-upload-fill"></div>
+          </div>
+          <small class="dica-upload" id="dica-upload">Requer o backend configurado com as credenciais do canal (ver README).</small>
+        </div>
+
+        <div class="campo">
+          <label for="a-material">Material de apoio (link)</label>
+          <input type="url" id="a-material" placeholder="https://...">
+        </div>
+
+        <div class="campo">
+          <label for="a-duracao">Duração (minutos)</label>
+          <input type="number" id="a-duracao" min="1" value="15">
+        </div>
+
+        <div class="campo">
+          <label>Também aparece em</label>
+          <div class="grupo-checkbox" id="grupo-modulos-vinculados"></div>
+        </div>
+
+        <button type="submit" class="botao botao-dourado botao-full" id="btn-salvar-aula">[ PUBLICAR AULA ]</button>
+      </form>
+    </section>
+  </main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+  document.getElementById('btn-sair').addEventListener('click', async () => {
+    await ViolaSessao.sair();
+    window.location.href = 'login-professor.html';
+  });
+
+  const RÓTULO_INSTRUMENTO = { violao: 'Violão', guitarra: 'Guitarra' };
+  let TODOS_MODULOS = [];
+  let moduloSelecionadoId = null;
+  let aulaEmEdicaoId = null;
+
+  async function iniciar() {
+    const sessao = await ViolaSessao.exigir('professor');
+    if (!sessao) return;
+
+    try {
+      TODOS_MODULOS = await ViolaAPI.listarModulos();
+      montarSeletorDeModulos();
+      montarChecklistDeModulos();
+      await carregarAulasDoModuloSelecionado();
+    } catch (erro) {
+      document.getElementById('lista-aulas-professor').innerHTML = `<p class="carregando">${erro.message}</p>`;
+    }
+  }
+
+  function montarSeletorDeModulos() {
+    const seletor = document.getElementById('seletor-modulo');
+    seletor.innerHTML = TODOS_MODULOS.map((m) => `<option value="${m.id}">${m.titulo}</option>`).join('');
+    moduloSelecionadoId = Number(seletor.value);
+    seletor.addEventListener('change', async () => {
+      moduloSelecionadoId = Number(seletor.value);
+      fecharFormulario();
+      await carregarAulasDoModuloSelecionado();
+    });
+  }
+
+  function montarChecklistDeModulos() {
+    const grupo = document.getElementById('grupo-modulos-vinculados');
+    grupo.innerHTML = TODOS_MODULOS.map((m) => `
+      <label class="opcao-checkbox">
+        <input type="checkbox" value="${m.id}" class="chk-modulo-vinculado">
+        ${m.titulo}
+      </label>
+    `).join('');
+  }
+
+  async function carregarAulasDoModuloSelecionado() {
+    const modulo = TODOS_MODULOS.find((m) => m.id === moduloSelecionadoId);
+    document.getElementById('titulo-modulo-atual').textContent = modulo ? modulo.titulo : '—';
+
+    const alvo = document.getElementById('lista-aulas-professor');
+    alvo.innerHTML = '<p class="carregando">Carregando aulas...</p>';
+
+    try {
+      const aulas = await ViolaAPI.aulasDoModuloProfessor(moduloSelecionadoId);
+      renderizarListaAulas(aulas);
+    } catch (erro) {
+      alvo.innerHTML = `<p class="carregando">${erro.message}</p>`;
+    }
+  }
+
+  function renderizarListaAulas(aulas) {
+    const alvo = document.getElementById('lista-aulas-professor');
+    if (!aulas.length) {
+      alvo.innerHTML = '<p class="carregando">Nenhuma aula postada neste módulo ainda.</p>';
+      return;
+    }
+
+    alvo.innerHTML = aulas.map((a, indice) => `
+      <div class="linha-aula-admin">
+        <div class="linha-aula-admin-ordem">
+          <button data-mover="cima" data-aula="${a.id}" ${indice === 0 ? 'disabled' : ''} title="Mover para cima">▲</button>
+          <button data-mover="baixo" data-aula="${a.id}" ${indice === aulas.length - 1 ? 'disabled' : ''} title="Mover para baixo">▼</button>
+        </div>
+        <div class="linha-aula-admin-info">
+          <strong>${escaparHtml(a.titulo)}</strong>
+          <small>${a.descricao ? escaparHtml(a.descricao) + ' · ' : ''}${a.duracao_min} min ${a.video_url ? '· 🎥' : ''} ${a.material_url ? '· 📄' : ''}</small>
+        </div>
+        <div class="linha-aula-admin-acoes">
+          <button class="botao botao-fantasma botao-pequeno" data-editar="${a.id}">Editar</button>
+          <button class="botao botao-fantasma botao-pequeno botao-perigo" data-excluir="${a.id}">Excluir</button>
+        </div>
+      </div>
+    `).join('');
+
+    alvo.querySelectorAll('[data-mover]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        try {
+          await ViolaAPI.moverAulaNoModulo(moduloSelecionadoId, btn.dataset.aula, btn.dataset.mover);
+          await carregarAulasDoModuloSelecionado();
+        } catch (erro) {
+          btn.disabled = false;
+        }
+      });
+    });
+
+    alvo.querySelectorAll('[data-editar]').forEach((btn) => {
+      btn.addEventListener('click', () => abrirFormularioParaEdicao(Number(btn.dataset.editar), aulas));
+    });
+
+    alvo.querySelectorAll('[data-excluir]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Excluir esta aula? Ela será removida de todos os módulos em que aparece.')) return;
+        btn.disabled = true;
+        try {
+          await ViolaAPI.excluirAula(btn.dataset.excluir);
+          await carregarAulasDoModuloSelecionado();
+        } catch (erro) {
+          alert(erro.message);
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  document.getElementById('btn-nova-aula').addEventListener('click', () => abrirFormularioParaCriacao());
+  document.getElementById('btn-fechar-form').addEventListener('click', fecharFormulario);
+
+  function abrirFormularioParaCriacao() {
+    aulaEmEdicaoId = null;
+    document.getElementById('form-aula').reset();
+    document.getElementById('titulo-form-aula').textContent = 'Nova aula';
+    document.getElementById('btn-salvar-aula').textContent = '[ PUBLICAR AULA ]';
+    document.querySelectorAll('.chk-modulo-vinculado').forEach((chk) => {
+      chk.checked = Number(chk.value) === moduloSelecionadoId;
+      chk.disabled = false;
+    });
+    ocultarMensagens('#erro-aula', '#sucesso-aula');
+    document.getElementById('painel-form-aula').classList.remove('oculto');
+    document.getElementById('painel-form-aula').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function abrirFormularioParaEdicao(aulaId, aulasCarregadas) {
+    const aula = aulasCarregadas.find((a) => a.id === aulaId);
+    if (!aula) return;
+
+    aulaEmEdicaoId = aulaId;
+    document.getElementById('titulo-form-aula').textContent = 'Editar aula';
+    document.getElementById('btn-salvar-aula').textContent = '[ SALVAR ALTERAÇÕES ]';
+    document.getElementById('a-titulo').value = aula.titulo || '';
+    document.getElementById('a-descricao').value = aula.descricao || '';
+    document.getElementById('a-conteudo').value = aula.conteudo || '';
+    document.getElementById('a-video').value = aula.video_url || '';
+    document.getElementById('a-material').value = aula.material_url || '';
+    document.getElementById('a-duracao').value = aula.duracao_min || 15;
+    document.getElementById('a-video-arquivo').value = '';
+
+    ViolaAPI.modulosDaAula(aulaId).then((idsAtuais) => {
+      document.querySelectorAll('.chk-modulo-vinculado').forEach((chk) => {
+        chk.checked = idsAtuais.includes(Number(chk.value));
+      });
+    });
+
+    ocultarMensagens('#erro-aula', '#sucesso-aula');
+    document.getElementById('painel-form-aula').classList.remove('oculto');
+    document.getElementById('painel-form-aula').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function fecharFormulario() {
+    document.getElementById('painel-form-aula').classList.add('oculto');
+    aulaEmEdicaoId = null;
+  }
+
+  // Upload opcional direto para o YouTube — preenche o campo de link ao concluir.
+  document.getElementById('a-video-arquivo').addEventListener('change', async (evento) => {
+    const arquivo = evento.target.files[0];
+    if (!arquivo) return;
+
+    const barra = document.getElementById('barra-upload');
+    const barraFill = document.getElementById('barra-upload-fill');
+    const dica = document.getElementById('dica-upload');
+    barra.classList.remove('oculto');
+    barraFill.style.width = '0%';
+    dica.textContent = 'Enviando para o YouTube...';
+
+    try {
+      const resultado = await ViolaAPI.enviarVideoParaYoutube(
+        arquivo,
+        { titulo: document.getElementById('a-titulo').value || arquivo.name, descricao: document.getElementById('a-descricao').value },
+        (percentual) => { barraFill.style.width = `${percentual}%`; }
+      );
+      document.getElementById('a-video').value = resultado.url;
+      dica.textContent = 'Vídeo enviado! Link preenchido automaticamente.';
+    } catch (erro) {
+      dica.textContent = erro.message;
+    }
+  });
+
+  document.getElementById('form-aula').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    ocultarMensagens('#erro-aula', '#sucesso-aula');
+    const botao = document.getElementById('btn-salvar-aula');
+
+    const modulosEscolhidos = Array.from(document.querySelectorAll('.chk-modulo-vinculado:checked')).map((c) => Number(c.value));
+    if (!modulosEscolhidos.length) {
+      exibirMensagem('#erro-aula', 'Escolha ao menos um módulo.');
+      return;
+    }
+
+    const dadosAula = {
+      titulo: document.getElementById('a-titulo').value.trim(),
+      descricao: document.getElementById('a-descricao').value.trim(),
+      conteudo: document.getElementById('a-conteudo').value.trim(),
+      video_url: document.getElementById('a-video').value.trim(),
+      material_url: document.getElementById('a-material').value.trim(),
+      duracao_min: Number(document.getElementById('a-duracao').value) || 15,
+    };
+
+    botao.disabled = true; botao.textContent = 'Salvando...';
+    try {
+      if (aulaEmEdicaoId) {
+        await ViolaAPI.atualizarAula(aulaEmEdicaoId, dadosAula);
+        await ViolaAPI.definirModulosDaAula(aulaEmEdicaoId, modulosEscolhidos);
+      } else {
+        const [primeiroModulo, ...restante] = modulosEscolhidos;
+        const aulaCriada = await ViolaAPI.criarAulaNoModulo(primeiroModulo, dadosAula);
+        if (restante.length) await ViolaAPI.definirModulosDaAula(aulaCriada.id, modulosEscolhidos);
+      }
+      exibirMensagem('#sucesso-aula', 'Aula salva com sucesso!', 'sucesso');
+      await carregarAulasDoModuloSelecionado();
+      setTimeout(fecharFormulario, 700);
+    } catch (erro) {
+      exibirMensagem('#erro-aula', erro.message);
+    } finally {
+      botao.disabled = false;
+      botao.textContent = aulaEmEdicaoId ? '[ SALVAR ALTERAÇÕES ]' : '[ PUBLICAR AULA ]';
+    }
+  });
+
+  iniciar();
+</script>
+</body>
+</html>

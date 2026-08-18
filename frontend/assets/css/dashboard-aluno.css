@@ -1,0 +1,116 @@
+/* ==========================================================
+   Dashboard do Aluno — módulos matriculados e suas aulas
+   ========================================================== */
+
+.welcome-section h1 { font-size: 1.9rem; margin-bottom: 6px; }
+.student-name { color: var(--dourado); }
+.nivel-tag { color: var(--texto-mutado); font-size: 0.85rem; margin-bottom: 34px; }
+
+.courses-section h2 { font-size: 1.3rem; margin-bottom: 22px; }
+.courses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px; }
+
+.course-card {
+    background: var(--vidro-fundo);
+    border: 1px solid var(--vidro-borda);
+    border-radius: var(--raio);
+    overflow: hidden;
+    transition: transform var(--transicao), border-color var(--transicao);
+}
+.course-card:hover { transform: translateY(-4px); border-color: rgba(212,175,55,0.4); }
+
+.card-image { height: 130px; display: flex; justify-content: center; align-items: center; background: rgba(212,175,55,0.06); }
+.modulo-icone { font-size: 42px; }
+
+.card-content { padding: 22px; }
+.card-content h3 { font-size: 1.05rem; margin-bottom: 8px; }
+.modulo-descricao { font-size: 0.82rem; color: var(--texto-mutado); margin-bottom: 16px; min-height: 34px; }
+
+.card-progress-bar { background: rgba(244,239,247,0.1); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+.progress-fill { background: linear-gradient(90deg, var(--roxo-medio), var(--dourado)); height: 100%; transition: width var(--transicao); }
+
+.linha-acoes { display: flex; justify-content: space-between; align-items: center; }
+.percentual-texto { font-size: 0.8rem; color: var(--texto-mutado); font-weight: 700; }
+
+.btn-continue {
+    background: transparent;
+    color: var(--dourado);
+    border: 1px solid rgba(212,175,55,0.5);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background var(--transicao), color var(--transicao);
+}
+.btn-continue:hover:not(:disabled) { background: var(--dourado); color: var(--roxo-profundo-2); }
+.btn-continue:disabled { opacity: 0.6; cursor: wait; }
+
+/* ----------------------------------------------------------
+   Lista de aulas dentro do módulo (expande abaixo do card)
+   ---------------------------------------------------------- */
+.lista-aulas {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--vidro-borda);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.item-aula {
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(244,239,247,0.06);
+}
+.item-aula:last-child { border-bottom: none; padding-bottom: 0; }
+
+.item-aula-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+}
+.item-aula-cabecalho input[type="checkbox"] {
+    margin-top: 4px;
+    width: 17px;
+    height: 17px;
+    accent-color: var(--dourado);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.item-aula-info { display: flex; flex-direction: column; gap: 2px; }
+.item-aula-info strong { font-size: 0.86rem; color: var(--texto-claro); }
+.item-aula-info small { font-size: 0.74rem; color: var(--texto-mutado); }
+
+.item-aula-conteudo {
+    margin: 10px 0 0 29px;
+    font-size: 0.8rem;
+    color: var(--texto-mutado);
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.item-aula-video {
+    margin: 10px 0 0 29px;
+    position: relative;
+    padding-top: 56.25%; /* 16:9 */
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(18,5,26,0.5);
+}
+.item-aula-video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.item-aula-link {
+    display: inline-block;
+    margin: 10px 0 0 29px;
+    font-size: 0.76rem;
+    color: var(--dourado);
+    text-decoration: underline;
+}
+.item-aula-link:hover { color: var(--dourado-brilho); }

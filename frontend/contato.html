@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fale Conosco | Viola Thinking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/app-shell.css">
+<link rel="stylesheet" href="assets/css/contato.css">
+</head>
+<body class="tela-app">
+  <header class="navbar">
+    <img src="assets/img/logo.svg" alt="Viola Thinking" class="logo-nav">
+    <nav class="nav-links">
+      <a href="historia.html">Nossa Jornada</a>
+      <a href="contato.html" class="active">Fale Conosco</a>
+      <a href="login-aluno.html">Entrar</a>
+    </nav>
+  </header>
+
+  <main class="container container-contato">
+    <div class="coluna-mapa">
+      <div class="mapa-estilizado vidro">
+        <svg viewBox="0 0 300 340" class="mapa-brasil" aria-label="Mapa estilizado do Brasil">
+          <path d="M120 10 C170 8 210 35 225 70 C245 95 270 110 268 150 C266 190 235 205 240 240 C245 275 210 300 175 320 C150 335 110 330 95 300 C80 275 55 265 45 230 C35 195 55 170 45 140 C35 110 55 80 80 55 C95 38 100 12 120 10 Z"
+                fill="none" stroke="url(#gradMapa)" stroke-width="2"/>
+          <defs>
+            <linearGradient id="gradMapa" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#5B2C6F"/>
+              <stop offset="100%" stop-color="#D4AF37"/>
+            </linearGradient>
+          </defs>
+          <g class="pin-viola" transform="translate(150,150)">
+            <circle r="7" fill="#D4AF37"/>
+            <circle r="14" fill="none" stroke="#D4AF37" stroke-width="1.4" opacity="0.5"/>
+          </g>
+        </svg>
+        <p class="mapa-legenda">Sede Viola Thinking — atendimento remoto para todo o Brasil</p>
+      </div>
+    </div>
+
+    <div class="coluna-form">
+      <h1>Fale com os Mestres</h1>
+      <p class="intro-contato">Conte um pouco sobre você e sua relação com a viola. Retornamos em até 2 dias úteis.</p>
+
+      <form id="form-contato" class="vidro cartao-contato">
+        <div class="mensagem-erro" id="erro-contato"></div>
+        <div class="mensagem-sucesso" id="sucesso-contato"></div>
+
+        <div class="campo">
+          <label for="c-nome">Nome completo</label>
+          <input type="text" id="c-nome" placeholder="Seu nome" required>
+        </div>
+        <div class="campo">
+          <label for="c-email">E-mail</label>
+          <input type="email" id="c-email" placeholder="voce@exemplo.com" required>
+        </div>
+        <div class="campo">
+          <label for="c-whatsapp">WhatsApp</label>
+          <input type="tel" id="c-whatsapp" placeholder="(00) 00000-0000">
+        </div>
+        <div class="campo">
+          <label for="c-nivel">Nível atual do músico</label>
+          <select id="c-nivel">
+            <option value="Iniciante">Iniciante</option>
+            <option value="Intermediário">Intermediário</option>
+            <option value="Avançado">Avançado</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="c-mensagem">Mensagem</label>
+          <textarea id="c-mensagem" placeholder="Conte o que te trouxe até a Viola Thinking..." required></textarea>
+        </div>
+        <button type="submit" class="botao botao-dourado botao-full" id="btn-contato">[ ENVIAR MENSAGEM ]</button>
+      </form>
+    </div>
+  </main>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+  document.getElementById('form-contato').addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    ocultarMensagens('#erro-contato', '#sucesso-contato');
+    const botao = document.getElementById('btn-contato');
+
+    const payload = {
+      nome: document.getElementById('c-nome').value.trim(),
+      email: document.getElementById('c-email').value.trim(),
+      whatsapp: document.getElementById('c-whatsapp').value.trim(),
+      nivel: document.getElementById('c-nivel').value,
+      mensagem: document.getElementById('c-mensagem').value.trim(),
+    };
+
+    botao.disabled = true; botao.textContent = 'Enviando...';
+    try {
+      const resposta = await ViolaAPI.enviarContato(payload);
+      exibirMensagem('#sucesso-contato', resposta.mensagem, 'sucesso');
+      document.getElementById('form-contato').reset();
+    } catch (erro) {
+      exibirMensagem('#erro-contato', erro.message);
+    } finally {
+      botao.disabled = false; botao.textContent = '[ ENVIAR MENSAGEM ]';
+    }
+  });
+</script>
+</body>
+</html>

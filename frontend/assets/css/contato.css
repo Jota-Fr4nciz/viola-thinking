@@ -1,0 +1,25 @@
+/* ==========================================================
+   Fale Conosco — mapa estilizado + formulário de captura
+   ========================================================== */
+
+.container-contato {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 46px;
+    align-items: start;
+}
+
+.mapa-estilizado { padding: 34px; text-align: center; }
+.mapa-brasil { width: 100%; height: auto; }
+.pin-viola { animation: pulsar 2.4s ease-in-out infinite; }
+@keyframes pulsar { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+.mapa-legenda { margin-top: 16px; font-size: 0.82rem; color: var(--texto-mutado); }
+
+.coluna-form h1 { font-size: 1.9rem; margin-bottom: 8px; }
+.intro-contato { color: var(--texto-mutado); font-size: 0.9rem; margin-bottom: 26px; max-width: 46ch; }
+
+.cartao-contato { padding: 32px; }
+
+@media (max-width: 880px) {
+    .container-contato { grid-template-columns: 1fr; }
+}

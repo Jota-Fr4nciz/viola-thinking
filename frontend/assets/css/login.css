@@ -1,0 +1,124 @@
+/* ==========================================================
+   Telas de Login — Portal de Acesso (Aluno) / Backstage (Professor)
+   ========================================================== */
+
+.tela-login {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow: hidden;
+}
+
+/* Contorno artístico e desfocado de uma viola ao fundo */
+.silhueta-viola {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 520px 620px at 78% 30%, rgba(212,175,55,0.10), transparent 60%),
+        radial-gradient(ellipse 60% 90% at 50% 55%, rgba(91,44,111,0.55), transparent 70%);
+    filter: blur(1px);
+    z-index: 0;
+}
+.silhueta-viola::after {
+    content: '';
+    position: absolute;
+    right: -6%;
+    top: 8%;
+    width: 480px;
+    height: 780px;
+    opacity: 0.16;
+    background: radial-gradient(ellipse at center, var(--dourado-brilho), transparent 70%);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 320'%3E%3Cpath d='M100 6C60 6 34 40 42 84c6 34 30 44 30 82 0 32-26 40-26 76 0 40 32 66 54 66s54-26 54-66c0-36-26-44-26-76 0-38 24-48 30-82C166 40 140 6 100 6Z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 320'%3E%3Cpath d='M100 6C60 6 34 40 42 84c6 34 30 44 30 82 0 32-26 40-26 76 0 40 32 66 54 66s54-26 54-66c0-36-26-44-26-76 0-38 24-48 30-82C166 40 140 6 100 6Z'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain; mask-size: contain;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    filter: blur(6px);
+}
+
+.cartao-login {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    padding: 44px 40px 36px;
+    text-align: center;
+}
+
+.logo-login { margin: 0 auto 6px; height: 46px; width: auto; }
+.subtitulo { color: var(--texto-mutado); font-size: 0.88rem; margin-bottom: 28px; }
+
+.abas {
+    display: flex;
+    background: rgba(18,5,26,0.35);
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 26px;
+}
+.aba {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--texto-mutado);
+    font-family: var(--fonte-corpo);
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    padding: 10px 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background var(--transicao), color var(--transicao);
+}
+.aba.ativa { background: linear-gradient(135deg, var(--dourado-brilho), var(--dourado)); color: var(--roxo-profundo-2); }
+
+.botao-full { width: 100%; margin-top: 6px; }
+
+.link-backstage {
+    display: inline-block;
+    margin-top: 22px;
+    font-size: 0.82rem;
+    color: var(--texto-mutado);
+    border-bottom: 1px solid transparent;
+    transition: color var(--transicao), border-color var(--transicao);
+}
+.link-backstage:hover { color: var(--dourado); border-color: var(--dourado); }
+
+/* ----------------------------------------------------------
+   Variante Backstage (Professor) — mesa de som / partituras
+   ---------------------------------------------------------- */
+.tela-backstage .silhueta-viola {
+    background:
+        radial-gradient(ellipse 700px 500px at 20% 20%, rgba(212,175,55,0.08), transparent 60%),
+        repeating-linear-gradient(100deg, rgba(244,239,247,0.02) 0px, rgba(244,239,247,0.02) 1px, transparent 1px, transparent 26px),
+        radial-gradient(ellipse 80% 100% at 80% 70%, rgba(74,21,75,0.6), transparent 70%);
+}
+.tela-backstage .silhueta-viola::after { content: none; }
+
+.switch-papel {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 22px;
+    background: rgba(18,5,26,0.4);
+    border-radius: 999px;
+    padding: 4px;
+    border: 1px solid var(--vidro-borda);
+}
+.switch-papel a {
+    flex: 1;
+    text-align: center;
+    padding: 9px 0;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--texto-mutado);
+    transition: background var(--transicao), color var(--transicao);
+}
+.switch-papel a.ativo { background: linear-gradient(135deg, var(--dourado-brilho), var(--dourado)); color: var(--roxo-profundo-2); }
+
+@media (max-width: 480px) {
+    .cartao-login { padding: 36px 26px 28px; }
+}

@@ -1,0 +1,17 @@
+<svg width="220" height="60" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradDourado" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0C766"/>
+      <stop offset="100%" stop-color="#D4AF37"/>
+    </linearGradient>
+  </defs>
+  <!-- Ícone: corpo estilizado de viola em traço único -->
+  <g transform="translate(4,6)" fill="none" stroke="url(#gradDourado)" stroke-width="2.2" stroke-linecap="round">
+    <path d="M24 2 C14 2 8 10 10 20 C11 26 16 28 16 34 C16 40 10 42 10 48 C10 53 17 56 24 56 C31 56 38 53 38 48 C38 42 32 40 32 34 C32 28 37 26 38 20 C40 10 34 2 24 2 Z"/>
+    <line x1="24" y1="6" x2="24" y2="52" stroke-width="1.2" opacity="0.7"/>
+    <circle cx="17" cy="17" r="2" fill="url(#gradDourado)" stroke="none"/>
+    <circle cx="31" cy="17" r="2" fill="url(#gradDourado)" stroke="none"/>
+  </g>
+  <text x="52" y="30" font-family="'Fraunces','Playfair Display',serif" font-size="22" font-weight="600" fill="#F2F3F4">Viola</text>
+  <text x="52" y="49" font-family="'Manrope','Segoe UI',sans-serif" font-size="13" letter-spacing="3" fill="#D4AF37">THINKING</text>
+</svg>

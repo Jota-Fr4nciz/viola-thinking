@@ -1,0 +1,34 @@
+/* ==========================================================
+   Postar Conteúdo — formulário de publicação de aulas
+   ========================================================== */
+
+.container-postar { max-width: 720px; }
+.container-postar .prof-especialidade { margin-bottom: 34px; }
+
+.cartao-postar { padding: 34px; }
+
+.grade-dois-campos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.grupo-checkbox { display: flex; gap: 22px; margin-top: 6px; }
+.opcao-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: var(--texto-claro);
+    cursor: pointer;
+}
+.opcao-checkbox input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--dourado);
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .grade-dois-campos { grid-template-columns: 1fr; }
+}
